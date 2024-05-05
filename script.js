@@ -1,5 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
+    // Load saved URLs from local storage
+    var savedURLs = JSON.parse(localStorage.getItem("savedURLs")) || [];
+    savedURLs.forEach(url => {
+        addURLToList(url);
+    });
+
     document.getElementById("addUrlButton").addEventListener("click", addURL);
+
+    // Check URL status every 30 seconds
+    setInterval(checkAllURLs, 30000);
 });
 
 function addURL() {
@@ -10,6 +19,17 @@ function addURL() {
         return;
     }
 
+    // Add URL to list
+    addURLToList(url);
+
+    // Save URL to local storage
+    saveURL(url);
+
+    // Clear input field
+    urlInput.value = "";
+}
+
+function addURLToList(url) {
     // Create new list item
     var listItem = document.createElement("li");
 
@@ -27,16 +47,29 @@ function addURL() {
     // Append list item to URL list
     document.getElementById("urlList").appendChild(listItem);
 
-    // Clear input field
-    urlInput.value = "";
-
-    // Add event listener to link for checking URL status
-    link.addEventListener("click", function() {
-        checkURLStatus(url, statusSpan);
-    });
-
     // Check URL status when added
     checkURLStatus(url, statusSpan);
+}
+
+function saveURL(url) {
+    // Get saved URLs from local storage
+    var savedURLs = JSON.parse(localStorage.getItem("savedURLs")) || [];
+    
+    // Add new URL to saved URLs
+    savedURLs.push(url);
+
+    // Save updated URLs to local storage
+    localStorage.setItem("savedURLs", JSON.stringify(savedURLs));
+}
+
+function checkAllURLs() {
+    var listItems = document.querySelectorAll("#urlList li");
+    listItems.forEach(function(listItem) {
+        var link = listItem.querySelector("a");
+        var statusSpan = listItem.querySelector(".status");
+        var url = link.textContent;
+        checkURLStatus(url, statusSpan);
+    });
 }
 
 function checkURLStatus(url, statusSpan) {
